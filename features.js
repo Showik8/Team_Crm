@@ -23,7 +23,7 @@ document.getElementById('activityFeed').innerHTML=acts.slice(0,5).map(a=>`<li><d
 const dO=['ორშაბათი','სამშაბათი','ოთხშაბათი','ხუთშაბათი','პარასკევი','შაბათი','კვირა'];
 const tI=new Date().getDay();const todayIdx=tI===0?6:tI-1;
 const up=data.practices.map(p=>{let d=dO.indexOf(p.day)-todayIdx;if(d<0)d+=7;return{...p,diff:d};}).sort((a,b)=>a.diff-b.diff||a.time.localeCompare(b.time)).slice(0,5);
-document.getElementById('upcomingEvents').innerHTML=up.map(e=>`<li><div class="feed-icon blue"><i class="fa-solid fa-calendar"></i></div><span class="feed-text">${tn(e.teamId)} - ${e.day} ${e.time} <span class="badge badge-${e.type==='თამაში'?'match':e.type==='ამხანაგური'?'friendly':'practice'}">${e.type}</span></span></li>`).join('')||'<li class="empty-state">ცარიელია</li>';
+document.getElementById('upcomingEvents').innerHTML=up.map(e=>`<li><div class="feed-icon blue"><i class="fa-solid fa-calendar"></i></div><span class="feed-text">${tn(e.teamId)} - ${e.day} ${e.time} (${sn(e.stadiumId)}) <span class="badge badge-${e.type==='თამაში'?'match':e.type==='ამხანაგური'?'friendly':'practice'}">${e.type}</span></span></li>`).join('')||'<li class="empty-state">ცარიელია</li>';
 
 // Injuries
 const ai=data.injuries.filter(injActive);
@@ -47,7 +47,7 @@ document.getElementById('teamsList').style.display='none';document.getElementByI
 document.getElementById('teamDetailContent').innerHTML=`<div class="team-detail-header"><div class="team-icon"><i class="fa-solid fa-shield-halved"></i></div><div class="td-info"><h3>${t.name}</h3><p>${t.schoolName} • ${t.monthlyFee}₾/თვე</p></div></div>
 <div class="stats-grid"><div class="stat-card stat-blue"><div class="stat-icon"><i class="fa-solid fa-users"></i></div><div class="stat-details"><h3>მოთამაშეები</h3><p>${ps.length}</p></div></div><div class="stat-card stat-green"><div class="stat-icon"><i class="fa-solid fa-money-bill"></i></div><div class="stat-details"><h3>გადახდილი</h3><p>${ps.filter(p=>p.hasPaidFee).length}/${ps.length}</p></div></div></div>
 <h3 style="margin:16px 0 8px">შემადგენლობა</h3><div class="table-container"><table class="data-table"><thead><tr><th>#</th><th>სახელი</th><th>პოზ.</th><th>ასაკი</th><th>რეიტ.</th></tr></thead><tbody>${ps.map(p=>`<tr onclick="showPlayerDetail('${p.id}')" style="cursor:pointer"><td>${p.number||'-'}</td><td style="font-weight:500">${p.name}</td><td>${p.position||'-'}</td><td>${age(p.birthDate)}</td><td><strong>${avgSkill(p)}</strong></td></tr>`).join('')}</tbody></table></div>
-<h3 style="margin:16px 0 8px">განრიგი</h3>${pr.map(p=>`<div class="practice-item" style="padding:6px 0;border-bottom:1px solid var(--border)"><span class="time">${p.time}</span><span class="team">${p.day} <span class="badge badge-${p.type==='თამაში'?'match':p.type==='ამხანაგური'?'friendly':'practice'}">${p.type}</span></span><span class="coach"><i class="fa-solid fa-user-tie"></i> ${cn(p.coachId)}</span></div>`).join('')||'<p class="empty-state">ცარიელია</p>'}`;
+<h3 style="margin:16px 0 8px">განრიგი</h3>${pr.map(p=>`<div class="practice-item" style="padding:6px 0;border-bottom:1px solid var(--border)"><span class="time">${p.time}</span><span class="team">${p.day} <span style="font-size:11px;color:var(--text-muted)">${sn(p.stadiumId)}</span> <span class="badge badge-${p.type==='თამაში'?'match':p.type==='ამხანაგური'?'friendly':'practice'}">${p.type}</span></span><span class="coach"><i class="fa-solid fa-user-tie"></i> ${cn(p.coachId)}</span></div>`).join('')||'<p class="empty-state">ცარიელია</p>'}`;
 }
 function closeTeamDetail(){document.getElementById('teamsList').style.display='';document.getElementById('teamDetailPanel').style.display='none';}
 
@@ -85,8 +85,12 @@ return`<div class="coach-card"><div class="coach-avatar">${ini}</div><div class=
 function renderSchedule(){
 const cs={};data.practices.forEach(p=>{const n=cn(p.coachId);cs[n]=(cs[n]||0)+1;});
 document.getElementById('coachesList').innerHTML=Object.keys(cs).length?Object.entries(cs).map(([n,c])=>`<li class="workload-item"><span class="workload-name">${n}</span><span class="badge badge-info">${c} ღონისძ.</span></li>`).join(''):'<li class="empty-state">ცარიელია</li>';
+
+const ss={};data.practices.forEach(p=>{const snm=sn(p.stadiumId);ss[snm]=(ss[snm]||0)+1;});
+document.getElementById('stadiumsWorkloadList').innerHTML=Object.keys(ss).length?Object.entries(ss).map(([n,c])=>`<li class="workload-item"><span class="workload-name">${n}</span><span class="badge badge-warning">${c} ჯავშანი</span></li>`).join(''):'<li class="empty-state">ცარიელია</li>';
+
 const dO=['ორშაბათი','სამშაბათი','ოთხშაბათი','ხუთშაბათი','პარასკევი','შაბათი','კვირა'];const dm={};data.practices.forEach(p=>{if(!dm[p.day])dm[p.day]=[];dm[p.day].push(p);});
-document.getElementById('scheduleList').innerHTML=data.practices.length?dO.filter(d=>dm[d]).map(d=>{dm[d].sort((a,b)=>a.time.localeCompare(b.time));return`<div class="day-card"><h4>${d}</h4>${dm[d].map(p=>`<div class="practice-item"><span class="time">${p.time}</span><span class="team">${tn(p.teamId)} <span class="badge badge-${p.type==='თამაში'?'match':p.type==='ამხანაგური'?'friendly':'practice'}">${p.type}</span></span><span class="coach"><i class="fa-solid fa-user-tie"></i> ${cn(p.coachId)}</span></div>`).join('')}</div>`;}).join(''):'<div class="empty-state">ცარიელია</div>';
+document.getElementById('scheduleList').innerHTML=data.practices.length?dO.filter(d=>dm[d]).map(d=>{dm[d].sort((a,b)=>a.time.localeCompare(b.time));return`<div class="day-card"><h4>${d}</h4>${dm[d].map(p=>`<div class="practice-item"><span class="time">${p.time}</span><span class="team">${tn(p.teamId)} <span style="font-size:10px;color:var(--text-muted)">${sn(p.stadiumId)}</span> <span class="badge badge-${p.type==='თამაში'?'match':p.type==='ამხანაგური'?'friendly':'practice'}">${p.type}</span></span><span class="coach"><i class="fa-solid fa-user-tie"></i> ${cn(p.coachId)}</span></div>`).join('')}</div>`;}).join(''):'<div class="empty-state">ცარიელია</div>';
 }
 
 // ===== MATCHES =====
@@ -94,6 +98,89 @@ function renderMatches(){
 document.getElementById('matchesList').innerHTML=data.matches.length?data.matches.map(m=>{const rc=m.result==='მოგება'?'badge-success':m.result==='წაგება'?'badge-danger':'badge-warning';
 return`<div class="match-card"><div class="match-teams"><div class="match-team"><div class="match-team-name">${tn(m.teamId)}</div></div><div class="match-score">${m.score}</div><div class="match-team"><div class="match-team-name">${m.opponent}</div></div></div><div class="match-meta"><span class="badge ${rc}">${m.result}</span><div class="match-type"><span class="badge badge-${m.type==='თამაში'?'match':'friendly'}">${m.type}</span></div><div style="margin-top:4px;font-size:11px">${m.date}</div>${m.scorers.length?`<div style="margin-top:4px;font-size:11px;color:var(--text-muted)">⚽ ${m.scorers.join(', ')}</div>`:''}</div></div>`;}).join(''):'<div class="empty-state">მატჩები არ არის</div>';
 }
+
+// ===== STADIUMS =====
+function renderStadiums(){
+    const sC=document.getElementById('stadiumsList');if(!sC)return;
+    sC.innerHTML=data.stadiums.map(s=>{
+        const sc=data.practices.filter(p=>p.stadiumId===s.id).length;
+        return`<div class="stadium-card">
+            <div class="stadium-icon"><i class="fa-solid fa-map-location-dot"></i></div>
+            <h3 class="stadium-title">${s.name}</h3>
+            <p class="stadium-location">${s.location} • ${s.type}</p>
+            <div class="stadium-stats">
+                <div class="s-stat">დაჯავშნები<strong>${sc}</strong></div>
+            </div>
+        </div>`;
+    }).join('')||'<div class="empty-state">სტადიონები არ არის</div>';
+}
+
+function renderStadiumSchedule(){
+    const tL=document.getElementById('stadiumScheduleList');if(!tL)return;
+    const f=document.getElementById('filterStadiumSchedule').value;
+    let ev=data.practices;if(f!=='all')ev=ev.filter(p=>p.stadiumId===f);
+    const dO=['ორშაბათი','სამშაბათი','ოთხშაბათი','ხუთშაბათი','პარასკევი','შაბათი','კვირა'];
+    
+    let html='';
+    dO.forEach(day=>{
+        let dayEvents=ev.filter(e=>e.day===day).sort((a,b)=>a.time.localeCompare(b.time));
+        html+=`<div class="cw-day">
+            <div class="cw-header">${day}</div>
+            <div class="cw-events">
+                ${dayEvents.map(e=>{
+                    let isMatch=e.type==='თამაში',isFriendly=e.type==='ამხანაგური';
+                    let cUrl=isMatch?'var(--warning)':isFriendly?'var(--purple)':'var(--primary)';
+                    let bgC=isMatch?'#FEF3C7':isFriendly?'#F3E8FF':'#EEF2FF';
+                    return `<div class="cw-event" style="background:${bgC}; border-left-color:${cUrl}">
+                        <div class="cw-event-time">${e.time}</div>
+                        <div class="cw-event-title" style="color:${cUrl}">${tn(e.teamId)}</div>
+                        <div class="cw-event-meta">${sn(e.stadiumId)}</div>
+                    </div>`;
+                }).join('')}
+            </div>
+        </div>`;
+    });
+    tL.innerHTML=html;
+}
+
+// ===== INVENTORY =====
+function renderInventory(){
+    const list=document.getElementById('inventoryList');
+    const stats=document.getElementById('inventoryStats');
+    if(!list || !stats)return;
+    
+    let totalItems=0, goodItems=0, badItems=0;
+    data.inventory.forEach(i=>{
+        totalItems+=i.qty;
+        if(i.condition==='დაზიანებული') badItems+=i.qty;
+        else goodItems+=i.qty;
+    });
+    
+    stats.innerHTML=`
+        <div class="stat-card stat-blue"><div class="stat-icon"><i class="fa-solid fa-boxes-stacked"></i></div><div class="stat-details"><h3>ჯამში</h3><p>${totalItems}</p></div></div>
+        <div class="stat-card stat-green"><div class="stat-icon"><i class="fa-solid fa-check"></i></div><div class="stat-details"><h3>მუშა მდგომარეობაში</h3><p>${goodItems}</p></div></div>
+        <div class="stat-card stat-red"><div class="stat-icon"><i class="fa-solid fa-xmark"></i></div><div class="stat-details"><h3>დაზიანებული/ჩამოსაწერი</h3><p>${badItems}</p></div></div>
+    `;
+    
+    list.innerHTML=data.inventory.map(i=>`
+        <div class="inventory-card">
+            <div class="inv-icon" style="background:${i.color}20;color:${i.color}"><i class="fa-solid ${i.icon}"></i></div>
+            <div class="inv-info">
+                <h4>${i.name}</h4>
+                <div class="inv-meta">
+                    <span class="badge ${i.condition==='დაზიანებული'?'badge-danger':i.condition==='ახალი'?'badge-success':'badge-info'}">${i.condition}</span>
+                    <span>${i.type}</span>
+                </div>
+            </div>
+            <div class="inv-qty">${i.qty} <span>ცალი</span></div>
+            <button class="btn btn-sm btn-outline" style="margin-left:10px" onclick="deleteInventory('${i.id}')"><i class="fa-solid fa-trash" style="color:var(--danger)"></i></button>
+        </div>
+    `).join('')||'<div class="empty-state">ინვენტარი არ არის დამატებული</div>';
+}
+window.deleteInventory=function(id){
+    data.inventory=data.inventory.filter(i=>i.id!==id);
+    updateUI();
+};
 
 // ===== ATTENDANCE =====
 function renderAttendance(){

@@ -38,6 +38,9 @@
                 <button class="nav-btn" data-target="matches">
                     <i class="fa-solid fa-trophy"></i><span>მატჩები</span>
                 </button>
+                <button class="nav-btn" data-target="stadiums">
+                    <i class="fa-solid fa-map-location-dot"></i><span>სტადიონები</span>
+                </button>
                 <button class="nav-btn" data-target="attendance">
                     <i class="fa-solid fa-clipboard-check"></i><span>დასწრება</span>
                 </button>
@@ -48,6 +51,9 @@
                 <span class="nav-section-label">ადმინისტრაცია</span>
                 <button class="nav-btn" data-target="transfers">
                     <i class="fa-solid fa-right-left"></i><span>ტრანსფერები</span>
+                </button>
+                <button class="nav-btn" data-target="inventory">
+                    <i class="fa-solid fa-box-open"></i><span>ინვენტარი</span>
                 </button>
                 <button class="nav-btn" data-target="documents">
                     <i class="fa-solid fa-file-lines"></i><span>დოკუმენტები</span>
@@ -172,8 +178,17 @@
                         <button class="btn btn-primary" onclick="openModal('practiceModal')"><i class="fa-solid fa-plus"></i> ღონისძიება</button>
                     </div>
                     <div class="schedule-container">
-                        <div class="coaches-workload"><h3>მწვრთნელების დატვირთვა</h3><ul id="coachesList" class="workload-list"></ul></div>
-                        <div class="schedule-grid"><h3>კვირის განრიგი</h3><div class="days-grid" id="scheduleList"></div></div>
+                        <div class="workloads-col">
+                            <div class="coaches-workload" style="margin-bottom:20px;">
+                                <h3 style="font-size:13px; margin-bottom:12px; color:var(--text-muted); text-transform:uppercase;">მწვრთნელები</h3>
+                                <ul id="coachesList" class="workload-list"></ul>
+                            </div>
+                            <div class="stadiums-workload">
+                                <h3 style="font-size:13px; margin-bottom:12px; color:var(--text-muted); text-transform:uppercase;">სტადიონები</h3>
+                                <ul id="stadiumsWorkloadList" class="workload-list"></ul>
+                            </div>
+                        </div>
+                        <div class="schedule-grid"><h3 style="font-size:16px; margin-bottom:12px;">კვირის განრიგი</h3><div class="days-grid" id="scheduleList"></div></div>
                     </div>
                 </section>
 
@@ -183,6 +198,22 @@
                         <h2 class="page-title">მატჩები და შედეგები</h2>
                     </div>
                     <div id="matchesList"></div>
+                </section>
+
+                <!-- ========== STADIUMS ========== -->
+                <section id="stadiums" class="page-section">
+                    <div class="section-header">
+                        <h2 class="page-title">სტადიონები</h2>
+                        <button class="btn btn-primary" onclick="openModal('stadiumModal')"><i class="fa-solid fa-plus"></i> სტადიონის რეგისტრაცია</button>
+                    </div>
+                    <div class="stadiums-grid" id="stadiumsList"></div>
+                    <div class="stadiums-calendar-container" style="margin-top:24px;">
+                        <h3 style="padding:16px 24px 8px;">სტადიონების კალენდარი</h3>
+                        <div class="table-filters" style="padding-top:0; border-bottom:none;">
+                            <select id="filterStadiumSchedule" onchange="renderStadiumSchedule()"><option value="all">ყველა სტადიონი</option></select>
+                        </div>
+                        <div class="calendar-week-grid" id="stadiumScheduleList"></div>
+                    </div>
                 </section>
 
                 <!-- ========== ATTENDANCE ========== -->
@@ -234,6 +265,16 @@
                             <tbody id="transfersList"></tbody>
                         </table>
                     </div>
+                </section>
+
+                <!-- ========== INVENTORY ========== -->
+                <section id="inventory" class="page-section">
+                    <div class="section-header">
+                        <h2 class="page-title">ინვენტარი და აღჭურვილობა</h2>
+                        <button class="btn btn-primary" onclick="openModal('inventoryModal')"><i class="fa-solid fa-plus"></i> ახალი ინვენტარი</button>
+                    </div>
+                    <div class="inventory-stats" id="inventoryStats"></div>
+                    <div class="inventory-grid" id="inventoryList"></div>
                 </section>
 
                 <!-- ========== DOCUMENTS ========== -->
@@ -432,6 +473,7 @@
         <form id="practiceForm">
             <div class="form-group"><label>ტიპი</label><select id="eventType"><option value="ვარჯიში">ვარჯიში</option><option value="თამაში">თამაში</option><option value="ამხანაგური">ამხანაგური</option></select></div>
             <div class="form-group"><label>გუნდი</label><select id="practiceTeam" required></select></div>
+            <div class="form-group"><label>სტადიონი</label><select id="practiceStadium" required></select></div>
             <div class="form-group"><label>მწვრთნელი</label><select id="practiceCoach" required></select></div>
             <div class="form-group"><label>კვირის დღე</label><select id="practiceDay"><option value="ორშაბათი">ორშაბათი</option><option value="სამშაბათი">სამშაბათი</option><option value="ოთხშაბათი">ოთხშაბათი</option><option value="ხუთშაბათი">ხუთშაბათი</option><option value="პარასკევი">პარასკევი</option><option value="შაბათი">შაბათი</option><option value="კვირა">კვირა</option></select></div>
             <div class="form-group"><label>დრო</label><input type="time" id="practiceTime" required></div>
@@ -505,6 +547,47 @@
 
     <!-- Player Detail Modal -->
     <div class="modal" id="playerDetailModal"><div class="modal-content modal-lg"><span class="close-btn" onclick="closeModal('playerDetailModal')">&times;</span><div id="playerDetailContent"></div></div></div>
+
+    <!-- Stadium Modal -->
+    <div class="modal" id="stadiumModal"><div class="modal-content">
+        <span class="close-btn" onclick="closeModal('stadiumModal')">&times;</span>
+        <h2>სტადიონის რეგისტრაცია</h2>
+        <form id="stadiumForm">
+            <div class="form-group"><label>სტადიონის სახელი</label><input type="text" id="stadiumName" required placeholder="მაგ: ბათუმი არენა"></div>
+            <div class="form-group"><label>ლოკაცია / მისამართი</label><input type="text" id="stadiumLocation" required placeholder="მაგ: ანგისას ბაზა"></div>
+            <div class="form-group"><label>მოედნის ტიპი</label><select id="stadiumType"><option value="ბუნებრივი">ბუნებრივი</option><option value="ხელოვნური">ხელოვნური</option><option value="დარბაზი">დარბაზი (პარკეტი)</option></select></div>
+            <button type="submit" class="btn btn-primary">რეგისტრაცია</button>
+        </form>
+    </div></div>
+
+    <!-- Inventory Modal -->
+    <div class="modal" id="inventoryModal"><div class="modal-content">
+        <span class="close-btn" onclick="closeModal('inventoryModal')">&times;</span>
+        <h2>ინვენტარის დამატება</h2>
+        <form id="inventoryForm">
+            <div class="form-group"><label>დასახელება</label><input type="text" id="invName" required placeholder="მაგ: ახალი ბურთები, კონუსები..."></div>
+            <div class="form-group"><label>ტიპი</label>
+                <select id="invType">
+                    <option value="ბურთი">ბურთი</option>
+                    <option value="კონუსი">კონუსი</option>
+                    <option value="ჟილეტი">ჟილეტი</option>
+                    <option value="სავარჯიშო ჯოხი">სავარჯიშო ჯოხი / ჩიხრე / ბარიერი</option>
+                    <option value="საბაზო ბადე">საკარე ბადე</option>
+                    <option value="სამედიცინო ჩანთა">სამედიცინო ჩანთა</option>
+                    <option value="სხვა">სხვა აღჭურვილობა</option>
+                </select>
+            </div>
+            <div class="form-group"><label>რაოდენობა</label><input type="number" id="invQty" required min="1" placeholder="10"></div>
+            <div class="form-group"><label>მდგომარეობა</label>
+                <select id="invCond">
+                    <option value="ახალი">ახალი</option>
+                    <option value="კარგი">კარგი</option>
+                    <option value="დაზიანებული">დაზიანებული</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">დამატება</button>
+        </form>
+    </div></div>
 
     <script src="script.js"></script>
     <script src="features.js"></script>
