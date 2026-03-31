@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Football School CRM — დინამო ბათუმი</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-futbol logo-icon"></i>
+                <h2>Junior Stats</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <span class="nav-section-label">მართვა</span>
+                <button class="nav-btn active" data-target="dashboard">
+                    <i class="fa-solid fa-chart-pie"></i><span>მთავარი</span>
+                </button>
+                <button class="nav-btn" data-target="teams">
+                    <i class="fa-solid fa-shield-halved"></i><span>გუნდები</span>
+                </button>
+                <button class="nav-btn" data-target="players">
+                    <i class="fa-solid fa-user-group"></i><span>ფეხბურთელები</span>
+                </button>
+                <button class="nav-btn" data-target="coaches">
+                    <i class="fa-solid fa-user-tie"></i><span>მწვრთნელები</span>
+                </button>
+
+                <span class="nav-section-label">ღონისძიებები</span>
+                <button class="nav-btn" data-target="schedule">
+                    <i class="fa-solid fa-calendar-days"></i><span>განრიგი</span>
+                </button>
+                <button class="nav-btn" data-target="matches">
+                    <i class="fa-solid fa-trophy"></i><span>მატჩები</span>
+                </button>
+                <button class="nav-btn" data-target="attendance">
+                    <i class="fa-solid fa-clipboard-check"></i><span>დასწრება</span>
+                </button>
+                <button class="nav-btn" data-target="calendar">
+                    <i class="fa-solid fa-calendar"></i><span>კალენდარი</span>
+                </button>
+
+                <span class="nav-section-label">ადმინისტრაცია</span>
+                <button class="nav-btn" data-target="transfers">
+                    <i class="fa-solid fa-right-left"></i><span>ტრანსფერები</span>
+                </button>
+                <button class="nav-btn" data-target="documents">
+                    <i class="fa-solid fa-file-lines"></i><span>დოკუმენტები</span>
+                </button>
+                <button class="nav-btn" data-target="finances">
+                    <i class="fa-solid fa-coins"></i><span>ფინანსები</span>
+                </button>
+                <button class="nav-btn" data-target="ratings">
+                    <i class="fa-solid fa-star"></i><span>რეიტინგები</span>
+                </button>
+                <button class="nav-btn" data-target="messages">
+                    <i class="fa-solid fa-envelope"></i><span>შეტყობინებები</span>
+                </button>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="school-badge"><i class="fa-solid fa-futbol"></i><span>დინამო ბათუმი</span></div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header">
+                <div class="header-left">
+                    <input type="text" class="global-search" id="globalSearch" placeholder="🔍 ძიება მოთამაშეებში, მწვრთნელებში..." oninput="handleGlobalSearch()">
+                </div>
+                <div class="user-profile">
+                    <div class="notif-bell" id="notifBell" onclick="toggleNotifications()">
+                        <i class="fa-solid fa-bell"></i>
+                        <span class="notif-count" id="notifCount">3</span>
+                    </div>
+                    <div class="avatar">ა</div>
+                    <span>ადმინისტრატორი</span>
+                </div>
+            </header>
+
+            <!-- Notifications Dropdown -->
+            <div class="notif-dropdown" id="notifDropdown" style="display:none">
+                <h4>შეტყობინებები</h4>
+                <div id="notifList"></div>
+            </div>
+
+            <!-- Search Results -->
+            <div class="search-results-overlay" id="searchResults" style="display:none;">
+                <div class="search-results-content" id="searchResultsContent"></div>
+            </div>
+
+            <div class="content-area">
+
+                <!-- ========== DASHBOARD ========== -->
+                <section id="dashboard" class="page-section active">
+                    <h2 class="page-title">მთავარი პანელი</h2>
+                    <div class="stats-grid" id="dashStats"></div>
+                    <div class="dashboard-grid">
+                        <div class="dash-card">
+                            <h3><i class="fa-solid fa-clock-rotate-left"></i> ბოლო აქტივობა</h3>
+                            <ul class="activity-feed" id="activityFeed"></ul>
+                        </div>
+                        <div class="dash-card">
+                            <h3><i class="fa-solid fa-forward"></i> მომავალი ღონისძიებები</h3>
+                            <ul class="upcoming-list" id="upcomingEvents"></ul>
+                        </div>
+                        <div class="dash-card">
+                            <h3><i class="fa-solid fa-kit-medical"></i> აქტიური ტრავმები</h3>
+                            <ul class="injury-list" id="activeInjuries"></ul>
+                        </div>
+                        <div class="dash-card">
+                            <h3><i class="fa-solid fa-chart-bar"></i> დასწრების მაჩვენებელი</h3>
+                            <div class="attendance-chart" id="attendanceChart"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ========== TEAMS ========== -->
+                <section id="teams" class="page-section">
+                    <div class="section-header">
+                        <h2 class="page-title">გუნდები</h2>
+                        <button class="btn btn-primary" onclick="openModal('teamModal')"><i class="fa-solid fa-plus"></i> გუნდის დამატება</button>
+                    </div>
+                    <div class="teams-grid" id="teamsList"></div>
+                    <div class="team-detail-panel" id="teamDetailPanel" style="display:none;">
+                        <button class="btn btn-outline" onclick="closeTeamDetail()"><i class="fa-solid fa-arrow-left"></i> უკან</button>
+                        <div id="teamDetailContent"></div>
+                    </div>
+                </section>
+
+                <!-- ========== PLAYERS ========== -->
+                <section id="players" class="page-section">
+                    <div class="section-header">
+                        <h2 class="page-title">ფეხბურთელები</h2>
+                        <div style="display:flex;gap:8px;">
+                            <button class="btn btn-outline" onclick="openModal('injuryModal')"><i class="fa-solid fa-kit-medical"></i> ტრავმა</button>
+                            <button class="btn btn-outline" onclick="openModal('noteModal')"><i class="fa-solid fa-sticky-note"></i> შენიშვნა</button>
+                            <button class="btn btn-primary" onclick="openModal('playerModal')"><i class="fa-solid fa-plus"></i> დამატება</button>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <div class="table-filters">
+                            <select id="filterPlayerTeam" onchange="renderPlayers()"><option value="all">ყველა გუნდი</option></select>
+                            <select id="filterPlayerFee" onchange="renderPlayers()"><option value="all">ყველა სტატუსი</option><option value="paid">გადახდილი</option><option value="unpaid">დავალიანება</option></select>
+                            <select id="filterPlayerDocs" onchange="renderPlayers()"><option value="all">დოკუმენტები</option><option value="complete">სრული</option><option value="missing">აკლია</option></select>
+                        </div>
+                        <table class="data-table">
+                            <thead><tr><th>#</th><th>სახელი</th><th>გუნდი</th><th>პოზიცია</th><th>ასაკი</th><th>საწევრო</th><th>დოკ.</th><th>ტრავმა</th><th>რეიტ.</th><th>მოქმ.</th></tr></thead>
+                            <tbody id="playersList"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- ========== COACHES ========== -->
+                <section id="coaches" class="page-section">
+                    <div class="section-header">
+                        <h2 class="page-title">მწვრთნელები</h2>
+                        <button class="btn btn-primary" onclick="openModal('coachModal')"><i class="fa-solid fa-plus"></i> დამატება</button>
+                    </div>
+                    <div class="coaches-grid" id="coachesGrid"></div>
+                </section>
+
+                <!-- ========== SCHEDULE ========== -->
+                <section id="schedule" class="page-section">
+                    <div class="section-header">
+                        <h2 class="page-title">განრიგი</h2>
+                        <button class="btn btn-primary" onclick="openModal('practiceModal')"><i class="fa-solid fa-plus"></i> ღონისძიება</button>
+                    </div>
+                    <div class="schedule-container">
+                        <div class="coaches-workload"><h3>მწვრთნელების დატვირთვა</h3><ul id="coachesList" class="workload-list"></ul></div>
+                        <div class="schedule-grid"><h3>კვირის განრიგი</h3><div class="days-grid" id="scheduleList"></div></div>
+                    </div>
+                </section>
+
+                <!-- ========== MATCHES ========== -->
+                <section id="matches" class="page-section">
+                    <div class="section-header">
+                        <h2 class="page-title">მატჩები და შედეგები</h2>
+                    </div>
+                    <div id="matchesList"></div>
+                </section>
+
+                <!-- ========== ATTENDANCE ========== -->
+                <section id="attendance" class="page-section">
+                    <div class="section-header">
+                        <h2 class="page-title">დასწრება</h2>
+                        <button class="btn btn-primary" onclick="openModal('attendanceModal')"><i class="fa-solid fa-plus"></i> ჩაწერა</button>
+                    </div>
+                    <div class="attendance-summary" id="attendanceSummary"></div>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead><tr><th>თარიღი</th><th>ღონისძიება</th><th>გუნდი</th><th>დასწრ.</th><th>არმოსულ.</th></tr></thead>
+                            <tbody id="attendanceList"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- ========== CALENDAR ========== -->
+                <section id="calendar" class="page-section">
+                    <div class="section-header">
+                        <h2 class="page-title">კალენდარი</h2>
+                        <div class="calendar-nav">
+                            <button class="btn btn-outline" onclick="changeMonth(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+                            <span id="calendarMonth" class="calendar-month-title"></span>
+                            <button class="btn btn-outline" onclick="changeMonth(1)"><i class="fa-solid fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                    <div class="calendar-legend">
+                        <span class="legend-item"><span class="legend-dot" style="background:#4F46E5"></span>ვარჯიში</span>
+                        <span class="legend-item"><span class="legend-dot" style="background:#F59E0B"></span>თამაში</span>
+                        <span class="legend-item"><span class="legend-dot" style="background:#8B5CF6"></span>ამხანაგური</span>
+                    </div>
+                    <div class="calendar-grid" id="calendarGrid"></div>
+                </section>
+
+                <!-- ========== TRANSFERS ========== -->
+                <section id="transfers" class="page-section">
+                    <div class="section-header">
+                        <h2 class="page-title">ტრანსფერები</h2>
+                        <button class="btn btn-primary" onclick="openModal('transferModal')"><i class="fa-solid fa-right-left"></i> ტრანსფერი</button>
+                    </div>
+                    <div class="transfer-info-box">
+                        <i class="fa-solid fa-info-circle"></i>
+                        გადაიყვანეთ ფეხბურთელი ერთი ასაკობრივი გუნდიდან მეორეში. ტრანსფერის ისტორია ავტომატურად შეინახება.
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead><tr><th>თარიღი</th><th>ფეხბურთელი</th><th>საიდან</th><th>სად</th><th>მიზეზი</th><th>სტატუსი</th></tr></thead>
+                            <tbody id="transfersList"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- ========== DOCUMENTS ========== -->
+                <section id="documents" class="page-section">
+                    <div class="section-header">
+                        <h2 class="page-title">დოკუმენტაცია</h2>
+                    </div>
+                    <div class="docs-grid">
+                        <div class="doc-template-card" onclick="generateDocument('enrollment')">
+                            <div class="doc-icon"><i class="fa-solid fa-file-contract"></i></div>
+                            <h4>ჩარიცხვის ცნობა</h4>
+                            <p>ფეხბურთელის სკოლაში ჩარიცხვის დამადასტურებელი დოკუმენტი</p>
+                        </div>
+                        <div class="doc-template-card" onclick="generateDocument('medical')">
+                            <div class="doc-icon med"><i class="fa-solid fa-heart-pulse"></i></div>
+                            <h4>სამედიცინო ცნობა</h4>
+                            <p>ჯანმრთელობის მდგომარეობის შესახებ ცნობის ფორმა</p>
+                        </div>
+                        <div class="doc-template-card" onclick="generateDocument('transfer_cert')">
+                            <div class="doc-icon transfer"><i class="fa-solid fa-right-left"></i></div>
+                            <h4>ტრანსფერის ცნობა</h4>
+                            <p>გუნდიდან გუნდში გადასვლის ოფიციალური დოკუმენტი</p>
+                        </div>
+                        <div class="doc-template-card" onclick="generateDocument('payment_cert')">
+                            <div class="doc-icon pay"><i class="fa-solid fa-receipt"></i></div>
+                            <h4>გადახდის ქვითარი</h4>
+                            <p>საწევრო თანხის გადახდის დამადასტურებელი ცნობა</p>
+                        </div>
+                        <div class="doc-template-card" onclick="generateDocument('roster')">
+                            <div class="doc-icon roster"><i class="fa-solid fa-list-check"></i></div>
+                            <h4>გუნდის სია</h4>
+                            <p>გუნდის მოთამაშეების სრული სია ქსეროქსისთვის</p>
+                        </div>
+                        <div class="doc-template-card" onclick="generateDocument('parent_consent')">
+                            <div class="doc-icon consent"><i class="fa-solid fa-file-signature"></i></div>
+                            <h4>მშობლის თანხმობა</h4>
+                            <p>მშობლის/მეურვის წერილობითი თანხმობის ფორმა</p>
+                        </div>
+                    </div>
+
+                    <!-- Document Preview -->
+                    <div class="doc-preview" id="docPreview" style="display:none;">
+                        <div class="doc-preview-header">
+                            <h3>დოკუმენტის გადახედვა</h3>
+                            <div><button class="btn btn-primary" onclick="printDocument()"><i class="fa-solid fa-print"></i> ბეჭდვა / ქსეროქსი</button>
+                            <button class="btn btn-outline" onclick="document.getElementById('docPreview').style.display='none'">დახურვა</button></div>
+                        </div>
+                        <div class="doc-paper" id="docPaper"></div>
+                    </div>
+                </section>
+
+                <!-- ========== FINANCES ========== -->
+                <section id="finances" class="page-section">
+                    <div class="section-header">
+                        <h2 class="page-title">ფინანსები</h2>
+                        <button class="btn btn-primary" onclick="openModal('paymentModal')"><i class="fa-solid fa-plus"></i> გადახდა</button>
+                    </div>
+                    <div class="finance-stats" id="financeStats"></div>
+                    <div class="table-container">
+                        <h3 style="padding:16px 24px 0;">გადახდების ისტორია</h3>
+                        <table class="data-table">
+                            <thead><tr><th>თარიღი</th><th>ფეხბურთელი</th><th>გუნდი</th><th>თანხა</th><th>თვე</th></tr></thead>
+                            <tbody id="paymentsList"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- ========== RATINGS ========== -->
+                <section id="ratings" class="page-section">
+                    <div class="section-header">
+                        <h2 class="page-title">მოთამაშეთა რეიტინგი</h2>
+                    </div>
+                    <div class="ratings-tabs">
+                        <button class="rating-tab active" onclick="switchRatingTab(this,'leaderboard')">ლიდერბორდი</button>
+                        <button class="rating-tab" onclick="switchRatingTab(this,'compare')">შედარება</button>
+                    </div>
+                    <div id="ratingsLeaderboard" class="rating-content active"></div>
+                    <div id="ratingsCompare" class="rating-content" style="display:none;">
+                        <div class="compare-selectors">
+                            <select id="comparePlayer1" onchange="renderComparison()"></select>
+                            <span class="vs-badge">VS</span>
+                            <select id="comparePlayer2" onchange="renderComparison()"></select>
+                        </div>
+                        <div id="comparisonResult"></div>
+                    </div>
+                </section>
+
+                <!-- ========== MESSAGES ========== -->
+                <section id="messages" class="page-section">
+                    <div class="section-header">
+                        <h2 class="page-title">შეტყობინებები მშობლებისთვის</h2>
+                    </div>
+                    <div class="msg-templates">
+                        <div class="msg-template-card" onclick="selectMsgTemplate('fee_reminder')">
+                            <i class="fa-solid fa-money-bill-wave"></i>
+                            <h4>საწევრო შეხსენება</h4>
+                            <p>გადაუხდელი საწევროს შეხსენება</p>
+                        </div>
+                        <div class="msg-template-card" onclick="selectMsgTemplate('schedule_change')">
+                            <i class="fa-solid fa-calendar-xmark"></i>
+                            <h4>განრიგის ცვლილება</h4>
+                            <p>ვარჯიშის ან თამაშის ცვლილების შეტყობინება</p>
+                        </div>
+                        <div class="msg-template-card" onclick="selectMsgTemplate('match_invite')">
+                            <i class="fa-solid fa-trophy"></i>
+                            <h4>თამაშის მოწვევა</h4>
+                            <p>მატჩზე მოწვევა მშობლებისთვის</p>
+                        </div>
+                        <div class="msg-template-card" onclick="selectMsgTemplate('general')">
+                            <i class="fa-solid fa-bullhorn"></i>
+                            <h4>ზოგადი განცხადება</h4>
+                            <p>თავისუფალი ტექსტის შეტყობინება</p>
+                        </div>
+                    </div>
+                    <div class="msg-compose" id="msgCompose" style="display:none;">
+                        <h3 id="msgComposeTitle"></h3>
+                        <div class="form-group">
+                            <label>მიმღები</label>
+                            <select id="msgRecipient">
+                                <option value="all">ყველა მშობელი</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>ტექსტი</label>
+                            <textarea id="msgText" rows="5"></textarea>
+                        </div>
+                        <div class="msg-preview-box" id="msgPreviewBox"></div>
+                        <button class="btn btn-primary" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i> გაგზავნა (სიმულაცია)</button>
+                    </div>
+                    <div class="msg-history" id="msgHistory">
+                        <h3 style="margin-top:24px;margin-bottom:12px;">გაგზავნილი შეტყობინებები</h3>
+                        <div id="sentMessages"></div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- ==================== MODALS ==================== -->
+    <!-- Team Modal -->
+    <div class="modal" id="teamModal"><div class="modal-content">
+        <span class="close-btn" onclick="closeModal('teamModal')">&times;</span>
+        <h2>ახალი გუნდი</h2>
+        <form id="teamForm">
+            <div class="form-group"><label>სკოლის სახელი</label><input type="text" id="schoolName" required placeholder="მაგ: დინამო ბათუმი"></div>
+            <div class="form-group"><label>ასაკობრივი კატეგორია</label><input type="text" id="ageCategory" required placeholder="მაგ: U-15"></div>
+            <div class="form-group"><label>თვიური საწევრო (₾)</label><input type="number" id="teamFee" required placeholder="100" min="0"></div>
+            <p class="preview-text">გუნდის სახელი: <strong id="teamNamePreview">-</strong></p>
+            <button type="submit" class="btn btn-primary">დამატება</button>
+        </form>
+    </div></div>
+
+    <!-- Player Modal -->
+    <div class="modal" id="playerModal"><div class="modal-content modal-lg">
+        <span class="close-btn" onclick="closeModal('playerModal')">&times;</span>
+        <h2>ფეხბურთელის დამატება</h2>
+        <form id="playerForm">
+            <div class="form-row">
+                <div class="form-group"><label>სახელი გვარი</label><input type="text" id="playerName" required></div>
+                <div class="form-group"><label>დაბადების თარიღი</label><input type="date" id="playerBirthDate"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>გუნდი</label><select id="playerTeam" required></select></div>
+                <div class="form-group"><label>პოზიცია</label><select id="playerPosition"><option value="">აირჩიეთ</option><option value="მეკარე">მეკარე</option><option value="მცველი">მცველი</option><option value="ნახევარმცველი">ნახევარმცველი</option><option value="თავდამსხმელი">თავდამსხმელი</option></select></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>ნომერი</label><input type="number" id="playerNumber" min="1" max="99" placeholder="10"></div>
+                <div class="form-group"><label>მშობლის ტელ.</label><input type="tel" id="playerParentPhone" placeholder="+995..."></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group checkbox-group"><label class="custom-checkbox"><input type="checkbox" id="hasPaidFee"> საწევრო გადახდილი</label></div>
+                <div class="form-group checkbox-group"><label class="custom-checkbox"><input type="checkbox" id="hasDocuments"> დოკუმენტები სრული</label></div>
+            </div>
+            <button type="submit" class="btn btn-primary">დამატება</button>
+        </form>
+    </div></div>
+
+    <!-- Coach Modal -->
+    <div class="modal" id="coachModal"><div class="modal-content">
+        <span class="close-btn" onclick="closeModal('coachModal')">&times;</span>
+        <h2>მწვრთნელი</h2>
+        <form id="coachForm">
+            <div class="form-group"><label>სახელი გვარი</label><input type="text" id="coachNameInput" required></div>
+            <div class="form-group"><label>ტელეფონი</label><input type="tel" id="coachPhone" placeholder="+995..."></div>
+            <div class="form-group"><label>სპეციალიზაცია</label><select id="coachSpecialty"><option value="მთავარი მწვრთნელი">მთავარი მწვრთნელი</option><option value="ასისტენტი">ასისტენტი</option><option value="მეკარეთა მწვრთნელი">მეკარეთა მწვრთნელი</option><option value="ფიტნეს მწვრთნელი">ფიტნეს მწვრთნელი</option></select></div>
+            <div class="form-group"><label>ხელფასი (₾)</label><input type="number" id="coachSalary" min="0" placeholder="1500"></div>
+            <button type="submit" class="btn btn-primary">დამატება</button>
+        </form>
+    </div></div>
+
+    <!-- Practice Modal -->
+    <div class="modal" id="practiceModal"><div class="modal-content">
+        <span class="close-btn" onclick="closeModal('practiceModal')">&times;</span>
+        <h2>ღონისძიება</h2>
+        <form id="practiceForm">
+            <div class="form-group"><label>ტიპი</label><select id="eventType"><option value="ვარჯიში">ვარჯიში</option><option value="თამაში">თამაში</option><option value="ამხანაგური">ამხანაგური</option></select></div>
+            <div class="form-group"><label>გუნდი</label><select id="practiceTeam" required></select></div>
+            <div class="form-group"><label>მწვრთნელი</label><select id="practiceCoach" required></select></div>
+            <div class="form-group"><label>კვირის დღე</label><select id="practiceDay"><option value="ორშაბათი">ორშაბათი</option><option value="სამშაბათი">სამშაბათი</option><option value="ოთხშაბათი">ოთხშაბათი</option><option value="ხუთშაბათი">ხუთშაბათი</option><option value="პარასკევი">პარასკევი</option><option value="შაბათი">შაბათი</option><option value="კვირა">კვირა</option></select></div>
+            <div class="form-group"><label>დრო</label><input type="time" id="practiceTime" required></div>
+            <button type="submit" class="btn btn-primary">დამატება</button>
+        </form>
+    </div></div>
+
+    <!-- Attendance Modal -->
+    <div class="modal" id="attendanceModal"><div class="modal-content modal-lg">
+        <span class="close-btn" onclick="closeModal('attendanceModal')">&times;</span>
+        <h2>დასწრება</h2>
+        <form id="attendanceForm">
+            <div class="form-row">
+                <div class="form-group"><label>თარიღი</label><input type="date" id="attendanceDate" required></div>
+                <div class="form-group"><label>გუნდი</label><select id="attendanceTeam" required onchange="loadTeamPlayersForAttendance()"></select></div>
+            </div>
+            <div class="form-group"><label>ღონისძიება</label><input type="text" id="attendanceEvent" required placeholder="ვარჯიში, თამაში..."></div>
+            <div class="attendance-checklist" id="attendanceChecklist"><p style="color:var(--text-muted);">აირჩიეთ გუნდი</p></div>
+            <button type="submit" class="btn btn-primary">შენახვა</button>
+        </form>
+    </div></div>
+
+    <!-- Payment Modal -->
+    <div class="modal" id="paymentModal"><div class="modal-content">
+        <span class="close-btn" onclick="closeModal('paymentModal')">&times;</span>
+        <h2>გადახდა</h2>
+        <form id="paymentForm">
+            <div class="form-group"><label>ფეხბურთელი</label><select id="paymentPlayer" required></select></div>
+            <div class="form-group"><label>თანხა (₾)</label><input type="number" id="paymentAmount" required min="1" placeholder="100"></div>
+            <div class="form-group"><label>თვე</label><select id="paymentMonth"><option>იანვარი</option><option>თებერვალი</option><option>მარტი</option><option>აპრილი</option><option>მაისი</option><option>ივნისი</option><option>ივლისი</option><option>აგვისტო</option><option>სექტემბერი</option><option>ოქტომბერი</option><option>ნოემბერი</option><option>დეკემბერი</option></select></div>
+            <div class="form-group"><label>თარიღი</label><input type="date" id="paymentDate" required></div>
+            <button type="submit" class="btn btn-primary">შენახვა</button>
+        </form>
+    </div></div>
+
+    <!-- Transfer Modal -->
+    <div class="modal" id="transferModal"><div class="modal-content">
+        <span class="close-btn" onclick="closeModal('transferModal')">&times;</span>
+        <h2>ტრანსფერი</h2>
+        <form id="transferForm">
+            <div class="form-group"><label>ფეხბურთელი</label><select id="transferPlayer" required></select></div>
+            <div class="form-group"><label>სად გადაიყვანოთ</label><select id="transferToTeam" required></select></div>
+            <div class="form-group"><label>მიზეზი</label><select id="transferReason"><option value="ასაკობრივი გადასვლა">ასაკობრივი გადასვლა</option><option value="მწვრთნელის რეკომენდაცია">მწვრთნელის რეკომენდაცია</option><option value="მშობლის თხოვნა">მშობლის თხოვნა</option><option value="სხვა">სხვა</option></select></div>
+            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-right-left"></i> გადაყვანა</button>
+        </form>
+    </div></div>
+
+    <!-- Injury Modal -->
+    <div class="modal" id="injuryModal"><div class="modal-content">
+        <span class="close-btn" onclick="closeModal('injuryModal')">&times;</span>
+        <h2>ტრავმა</h2>
+        <form id="injuryForm">
+            <div class="form-group"><label>ფეხბურთელი</label><select id="injuryPlayer" required></select></div>
+            <div class="form-group"><label>ტრავმის ტიპი</label><input type="text" id="injuryType" required placeholder="კუნთის გაჭიმვა"></div>
+            <div class="form-group"><label>თარიღი</label><input type="date" id="injuryDate" required></div>
+            <div class="form-group"><label>აღდგენა (დღე)</label><input type="number" id="injuryRecovery" min="1" placeholder="14"></div>
+            <button type="submit" class="btn btn-primary">შენახვა</button>
+        </form>
+    </div></div>
+
+    <!-- Note Modal -->
+    <div class="modal" id="noteModal"><div class="modal-content">
+        <span class="close-btn" onclick="closeModal('noteModal')">&times;</span>
+        <h2>შენიშვნა</h2>
+        <form id="noteForm">
+            <div class="form-group"><label>ფეხბურთელი</label><select id="notePlayer" required></select></div>
+            <div class="form-group"><label>შენიშვნა</label><textarea id="noteText" rows="4" required placeholder="ჩაწერეთ..."></textarea></div>
+            <button type="submit" class="btn btn-primary">შენახვა</button>
+        </form>
+    </div></div>
+
+    <!-- Player Detail Modal -->
+    <div class="modal" id="playerDetailModal"><div class="modal-content modal-lg"><span class="close-btn" onclick="closeModal('playerDetailModal')">&times;</span><div id="playerDetailContent"></div></div></div>
+
+    <script src="script.js"></script>
+    <script src="features.js"></script>
+</body>
+</html>
